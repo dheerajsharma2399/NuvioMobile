@@ -6,9 +6,6 @@ on:
 permissions:
   contents: read
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build-ios:
     runs-on: macos-15
@@ -17,10 +14,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          submodules: recursive
+          fetch-depth: 0
 
       - name: List files
-        run: ls -la
+        run: |
+          ls -la
+          ls -la MPVKit || true
 
       - name: Build iOS without signing
         run: |

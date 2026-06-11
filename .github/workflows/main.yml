@@ -14,13 +14,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
         with:
-          submodules: recursive
+          submodules: true
           fetch-depth: 0
 
       - name: List files
         run: |
           ls -la
           ls -la MPVKit || true
+          cat .gitmodules || true
 
       - name: Build iOS without signing
         run: |
@@ -34,18 +35,3 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             build
-
-      - name: Package IPA
-        run: |
-          mkdir -p build/Payload
-          APP_PATH=$(find . -path "*/Release-iphoneos/*.app" | head -n 1)
-          echo "Found app: $APP_PATH"
-          cp -R "$APP_PATH" build/Payload/
-          cd build
-          zip -r NuvioMobile-unsigned.ipa Payload
-
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: NuvioMobile-unsigned-ipa
-          path: build/NuvioMobile-unsigned.ipa

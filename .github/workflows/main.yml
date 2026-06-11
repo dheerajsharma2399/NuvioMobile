@@ -3,17 +3,26 @@ name: Build Unsigned iOS IPA
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
 
-      - name: Make scripts executable
-        run: chmod +x ./scripts/run-mobile.sh
+      - name: List files
+        run: ls -la
 
-      - name: Build iOS Release without signing
+      - name: Build iOS without signing
         run: |
           xcodebuild \
             -project iosApp/iosApp.xcodeproj \
@@ -26,10 +35,11 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             build
 
-      - name: Package unsigned IPA
+      - name: Package IPA
         run: |
           mkdir -p build/Payload
           APP_PATH=$(find . -path "*/Release-iphoneos/*.app" | head -n 1)
+          echo "Found app: $APP_PATH"
           cp -R "$APP_PATH" build/Payload/
           cd build
           zip -r NuvioMobile-unsigned.ipa Payload
